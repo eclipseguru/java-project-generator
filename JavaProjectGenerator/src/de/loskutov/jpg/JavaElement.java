@@ -15,12 +15,12 @@ import java.util.stream.IntStream;
 
 public abstract class JavaElement {
 
-	static int fieldsCount = 3;
-	static int importsCount = 3;
-	static int commentsCount = 3;
-	static int seeCount = 3;
-	static int methodCounts = 1;
-	static boolean useExtend = true;
+    protected static int fieldsCount = 3;
+	protected static int importsCount = 3;
+	protected static int commentsCount = 3;
+	protected static int seeCount = 3;
+	protected static int methodCounts = 1;
+	protected static boolean useExtend = true;
 
 	static final List<String> IMPORTS = Arrays.asList(
 			"java.awt.datatransfer.*",
@@ -88,30 +88,42 @@ public abstract class JavaElement {
 
 
 
-	String name;
-	String packageName;
-	static final Ring<String> imports = new Ring<>(IMPORTS);
-	static final Ring<String> fields = new Ring<>(FIELDS);
-	static final Ring<String> genTypes = new Ring<>(LETTERS);
-	final Ring<String> loremIpsum = new Ring<>(LOREM);
+	protected String name;
+	protected String packageName;
+	protected static final Ring<String> imports = new Ring<>(IMPORTS);
+	protected static final Ring<String> fields = new Ring<>(FIELDS);
+	protected static final Ring<String> genTypes = new Ring<>(LETTERS);
+	protected final Ring<String> loremIpsum = new Ring<>(LOREM);
 
-	JavaElement(String name, String packageName){
+	public JavaElement(String name, String packageName){
 		this.name = name;
 		this.packageName = packageName;
 	}
 
-	abstract String generateCode();
+	protected abstract String generateCode();
 
-	String generateImports() {
+    private List<String> additionalImports;
+
+    public void setAdditionalImports(List<String> imports) {
+        this.additionalImports = imports;
+    }
+
+	protected String generateImports() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < importsCount; i++) {
 			sb.append("import ").append(imports.next()).append(";\n");
+		}
+		if(additionalImports != null) {
+	        sb.append("\n");
+		    for (String additionalImport : additionalImports) {
+	            sb.append("import ").append(additionalImport).append(";\n");
+            }
 		}
 		sb.append("\n");
 		return sb.toString();
 	}
 
-	String generateComments() {
+	protected String generateComments() {
 		StringBuilder sb = new StringBuilder();
 		if(commentsCount > 0) {
 			sb.append("/**\n");
@@ -127,7 +139,7 @@ public abstract class JavaElement {
 		return sb.toString();
 	}
 
-	String generateFields() {
+	protected String generateFields() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < fieldsCount; i++) {
 			sb.append("\t ").append(fields.next()).append(" f").append(i).append(" = null;\n");
@@ -136,7 +148,7 @@ public abstract class JavaElement {
 		return sb.toString();
 	}
 
-	int persist(Path root) throws IOException {
+	public int persist(Path root) throws IOException {
 		int lines = 0;
 		try(BufferedWriter writer = createWriter(root)){
 			String code = generateCode();
@@ -149,11 +161,15 @@ public abstract class JavaElement {
 		return lines;
 	}
 
-	String fqn() {
+	public String fqn() {
 		return packageName + "." + name;
 	}
 
-	BufferedWriter createWriter(Path root) throws IOException {
+    public String name() {
+        return name;
+    }
+
+	protected BufferedWriter createWriter(Path root) throws IOException {
 		Path path = root.resolve(packageName.replace('.', File.separatorChar)).resolve(name + ".java");
 		Files.createDirectories(path.getParent());
 		return Files.newBufferedWriter(path, StandardCharsets.UTF_8);

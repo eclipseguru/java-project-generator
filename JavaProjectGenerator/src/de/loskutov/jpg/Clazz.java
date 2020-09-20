@@ -12,7 +12,7 @@ public class Clazz extends JavaElement {
 	}
 
 	@Override
-	String generateCode() {
+    protected String generateCode() {
 		boolean object = "java.lang.Object".equals(extend);
 		if(object) {
 			return generateFirstObject();

@@ -10,7 +10,7 @@ public class Interface extends JavaElement {
 	}
 
 	@Override
-	String generateCode() {
+    protected String generateCode() {
 		String type = genTypes.next();
 		String s = "package " + packageName + ";\n\n" +
 				generateImports() +

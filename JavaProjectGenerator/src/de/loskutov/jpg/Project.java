@@ -8,6 +8,7 @@ import static java.nio.file.Files.readString;
 import static java.nio.file.Files.write;
 import static java.nio.file.Files.writeString;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class Project {
 
@@ -28,6 +30,7 @@ public class Project {
     private String name;
     private Template template;
     private List<Project> projectDependencies = new ArrayList<>();
+    private List<Jar> jarDependencies;
 
     public Project(String name, Path root, Template template) {
         this.name = name;
@@ -68,6 +71,9 @@ public class Project {
         for (Project project : projectDependencies) {
             projectClasspath.add(indexOfOutputEntry, format("\t<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/%s\"/>", project.getName()));
         }
+        for (Jar jar : jarDependencies) {
+            projectClasspath.add(indexOfOutputEntry, format("\t<classpathentry kind=\"lib\" path=\"/%s\" sourcepath=\"/%s\"/>", jar.getJar(), jar.getSourcesJar()));
+        }
         write(dotClasspath, projectClasspath);
     }
 
@@ -92,6 +98,10 @@ public class Project {
 
     public void addDependency(Project p) {
         projectDependencies.add(p);
+    }
+
+    public void addJars(Stream<Jar> jarStream) {
+        this.jarDependencies = jarStream.collect(toList());
     }
 
 }

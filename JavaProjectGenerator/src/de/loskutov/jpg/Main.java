@@ -3,16 +3,20 @@ package de.loskutov.jpg;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import de.loskutov.jpg.Project.Template;
+import de.loskutov.jpg.patterns.PackageSplitAcrossProjects;
+import de.loskutov.jpg.patterns.Pattern;
+import de.loskutov.jpg.patterns.TypeHierarchyAcrossProjects;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
         String pathname = "./target/generated/";
 
-        int projects = 10;
-        int dependencies = 100;
+        int projects = 100;
+        int dependencies = 300;
         int roots = 10;
         int depth = 10;
         int classes = 100;
@@ -23,7 +27,9 @@ public class Main {
         int see = 3;
         int methods = 1;
         boolean extend = false;
+
         Project.Template template = Template.Java11;
+        String jarlist = null;
 
         if (args.length == 0) {
             System.out.println("No arguments given, using defaults");
@@ -45,6 +51,7 @@ public class Main {
                 if (javaVersion == 8) {
                     template = Template.Java8;
                 }
+                jarlist = args[argc++];
             } catch (Exception e) {
                 //
             }
@@ -65,6 +72,9 @@ public class Main {
         JavaElement.methodCounts = methods;
         JavaElement.useExtend = extend;
 
-        new ProjectBuilder(projects, dependencies, depth, roots, classes, root, template).build();
+
+        List<Jar> jars = new JarListBuilder(jarlist).build();
+        List<Pattern> patterns = List.of(new PackageSplitAcrossProjects(3), new TypeHierarchyAcrossProjects());
+        new ProjectBuilder(projects, dependencies, depth, roots, classes, root, template, jars, patterns).build();
     }
 }

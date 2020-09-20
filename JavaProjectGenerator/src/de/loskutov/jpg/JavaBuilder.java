@@ -42,7 +42,7 @@ class JavaBuilder {
         interfaces = new ArrayList<>();
     }
 
-    void build() throws IOException {
+    Stats build() throws IOException {
 		List<Package> rootPackages = new ArrayList<>();
 
 		for (int i = 0; i < roots; i++) {
@@ -68,7 +68,7 @@ class JavaBuilder {
 		List<JavaElement> elements = new ArrayList<>(interfaces);
 		elements.addAll(classes);
 		elements.forEach(t -> lines.addAndGet(generateFile(t)));
-		System.out.println("Generated " + elements.size() + " classes with " + lines + " lines of code");
+		return new Stats(elements.size(), lines.get());
 	}
 
 	private int generateFile(JavaElement e) {
